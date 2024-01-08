@@ -3,3 +3,6 @@ licensed under the Creative Commons CC0 1.0 Universal License.
 
 Created using some code from <https://github.com/StanislavPetrovV/3D-Graphics-Engine> from <https://www.youtube.com/@CoderSpaceChannel>,
 licensed under the MIT License.
+
+Created using some code from <https://imanolfotia.com/blog/1> from <https://www.youtube.com/@NullPointer>,
+licensed under the GNU General Public License v3.0.
