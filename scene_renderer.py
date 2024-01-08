@@ -10,11 +10,11 @@ class SceneRenderer:
         # depth buffer
         self.depth_texture = self.mesh.texture.textures['depth_texture']
 
-        self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(app.WIN_SIZE)
-        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE)
-        self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE)
-        self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE)
-        self.rfm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE)
+        self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(app.WIN_SIZE * 2)
+        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
+        self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
+        self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
+        self.rfm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2, comps=4)
         self.SSRO:mgl.Texture        = self.mesh.texture.get_render_texture(app.WIN_SIZE)
 
         self.depth_fbo       = self.ctx.framebuffer(depth_attachment=self.depth_texture)
@@ -34,6 +34,9 @@ class SceneRenderer:
         for obj in self.scene.objects:
             obj.render()
         self.scene.skybox.render()
+
+        self.crt_texture.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+        self.crt_texture.build_mipmaps(0, 8)
 
         
     def process_render(self):

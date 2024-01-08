@@ -41,17 +41,29 @@ class ExtendedBaseModel(BaseModel):
         self.on_init()
 
     def update(self):
-        self.texture.use(location=0)
         self.program['camPos'].write(self.camera.position)
 
         self.program['m_proj'].write(self.camera.m_proj)
         self.program['m_view'].write(self.camera.m_view)
         self.program['m_model'].write(self.m_model)
-
-        self.program['shadowMap'] = 1
-        self.depth_texture.use(location=1)
+        
+        # texture
+        self.texture = self.app.mesh.texture.textures[self.tex_id]
         self.program['u_texture_0'] = 0
         self.texture.use(location=0)
+        # texture
+        self.texture = self.app.mesh.texture.textures['rough']
+        self.program['u_texture_1'] = 1
+        self.texture.use(location=1)
+
+
+        self.program['u_brdfLUT'] = 9
+        self.brdfLUT.use(location=9)
+
+        self.program['shadowMap'] = 10
+        self.depth_texture.use(location=10)
+        
+        self.depth_texture = self.app.mesh.texture.textures['depth_texture']
         
 
     def update_shadow(self):
@@ -68,8 +80,8 @@ class ExtendedBaseModel(BaseModel):
         self.program['u_resolution'].write(glm.vec2(self.app.light.RESOLUTION*self.app.light.ppsm))
         # depth texture
         self.depth_texture = self.app.mesh.texture.textures['depth_texture']
-        self.program['shadowMap'] = 1
-        self.depth_texture.use(location=1)
+        self.program['shadowMap'] = 10
+        self.depth_texture.use(location=10)
         # shadow
         self.shadow_vao = self.app.mesh.vao.vaos['shadow_' + self.vao_name]
         self.shadow_program = self.shadow_vao.program
@@ -80,6 +92,10 @@ class ExtendedBaseModel(BaseModel):
         self.texture = self.app.mesh.texture.textures[self.tex_id]
         self.program['u_texture_0'] = 0
         self.texture.use(location=0)
+        # texture
+        self.texture = self.app.mesh.texture.textures['rough']
+        self.program['u_texture_1'] = 1
+        self.texture.use(location=1)
         # brdf
         self.brdfLUT = self.app.mesh.texture.textures['brdfLUT']
         self.program['u_brdfLUT'] = 9
@@ -110,14 +126,12 @@ class Screen:
 
     def render_SSR(self, frame:mgl.Texture, norm:mgl.Texture, pos:mgl.Texture):
         self.update()
-        self.program_SSR['gfi'] = 1
         self.program_SSR['gNormal'] = 2
         self.program_SSR['gPosition'] = 3
-        self.program_SSR['envMap'] = 4
+        self.program_SSR['gfi'] = 1
         frame.use(location=1)
         norm.use(location=2)
         pos.use(location=3)
-        self.app.mesh.texture.textures["skybox"].use(location=4)
         
         mv = self.app.camera.m_view
         mp = self.app.camera.m_proj
@@ -145,43 +159,11 @@ class Screen:
 
 
 
+
 class Cube(ExtendedBaseModel):
-    def __init__(self, app, vao_name='cube', tex_id=0, pos=(0, 0, 0), rot=(0, 0, 0), scale=(1, 1, 1)):
-        super().__init__(app, vao_name, tex_id, pos, rot, scale)
-
-
-class MovingCube(Cube):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def update(self):
-        self.m_model = self.get_model_matrix()
-        super().update()
-
-
-class Cat(ExtendedBaseModel):
-    def __init__(self, app, vao_name='cat', tex_id='cat',
-                 pos=(0, 0, 0), rot=(-90, 0, 0), scale=(1, 1, 1)):
-        super().__init__(app, vao_name, tex_id, pos, rot, scale)
-
-
-class SkyBox(BaseModel):
-    def __init__(self, app, vao_name='skybox', tex_id='skybox',
+    def __init__(self, app, vao_name='cube', tex_id='cat',
                  pos=(0, 0, 0), rot=(0, 0, 0), scale=(1, 1, 1)):
         super().__init__(app, vao_name, tex_id, pos, rot, scale)
-        self.on_init()
-
-    def update(self):
-        self.program['m_view'].write(glm.mat4(glm.mat3(self.camera.m_view)))
-
-    def on_init(self):
-        # texture
-        self.texture = self.app.mesh.texture.textures[self.tex_id]
-        self.program['u_texture_skybox'] = 0
-        self.texture.use(location=0)
-        # mvp
-        self.program['m_proj'].write(self.camera.m_proj)
-        self.program['m_view'].write(glm.mat4(glm.mat3(self.camera.m_view)))
 
 
 class AdvancedSkyBox(BaseModel):

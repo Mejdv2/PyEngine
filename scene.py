@@ -19,7 +19,8 @@ class Scene:
         add = self.add_object
 
         # cat
-        add(Cat(app, pos=(0, -1, -10)))
+        add(Cube(app, pos=(0, 0, -10), scale=(5, 5, 5)))
+        add(Cube(app, pos=(6, 0, -16), scale=(1, 5, 1)))
 
     def update(self):
         pass

@@ -33,7 +33,7 @@ class GraphicsEngine:
         # camera
         self.camera = Camera(self)
         # light
-        self.light = DirectionalLight(self, (0, 1, 0))
+        self.light = DirectionalLight(self, (-45, -45, -45))
         # mesh
         self.mesh = Mesh(self)
         # scene
@@ -73,7 +73,10 @@ class GraphicsEngine:
             self.camera.update()
             self.check_events()
             self.render()
-            print(1/self.delta_time)
+            try:
+                print(1/self.delta_time)
+            except:
+                print("INF")
 
 
 if __name__ == '__main__':

@@ -8,9 +8,10 @@ class Texture:
         self.app = app
         self.ctx:mgl.Context = app.ctx
         self.textures = {}
-        self.textures['cat'] = self.get_texture(path='textures/main.png')
+        self.textures['cat'] = self.get_texture(path='textures/tiles/Tiles107_1K-PNG_ColorR.png')
+        self.textures['rough'] = self.get_texture(path='textures/tiles/Tiles107_1K-PNG_Roughness.png')
         self.textures['brdfLUT'] = self.get_texture(path='ibl_brdf_lut.png')
-        self.textures['brdfLUT'].repeat_x = False
+        self.textures['brdfLUT'].repeat_x = False 
         self.textures['brdfLUT'].repeat_y = False
         
         self.textures['skybox'] = self.get_texture_cube(dir_path='textures/skybox1/', ext='png')
@@ -23,8 +24,8 @@ class Texture:
         depth_texture.repeat_y = False
         return depth_texture
 
-    def get_render_depth(self, size):
-        depth_texture = self.ctx.depth_texture(size)
+    def get_render_depth(self, size, comps=3):
+        depth_texture = self.ctx.depth_texture(size, components=comps)
         return depth_texture
     
     def get_render_texture(self, size, comps=4):

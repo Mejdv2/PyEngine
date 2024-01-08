@@ -8,8 +8,7 @@ class VBO:
         self.vbos = {}
         self.vbos['cube'] = CubeVBO(ctx)
         self.vbos['screen'] = ScreenVBO(ctx)
-        self.vbos['cat'] = CatVBO(ctx)
-        self.vbos['skybox'] = SkyBoxVBO(ctx)
+        self.vbos['obj'] = ObjVBO(ctx)
         self.vbos['advanced_skybox'] = AdvancedSkyBoxVBO(ctx)
 
     def destroy(self):
@@ -98,7 +97,7 @@ class ScreenVBO(BaseVBO):
         return vertex_data
 
 
-class CatVBO(BaseVBO):
+class ObjVBO(BaseVBO):
     def __init__(self, app):
         super().__init__(app)
         self.format = '2f 3f 3f'
@@ -112,11 +111,11 @@ class CatVBO(BaseVBO):
         return vertex_data
 
 
-class SkyBoxVBO(BaseVBO):
+class InvCubeVBO(BaseVBO):
     def __init__(self, ctx):
         super().__init__(ctx)
-        self.format = '3f'
-        self.attribs = ['in_position']
+        self.format = '2f 3f 3f'
+        self.attribs = ['in_texcoord_0', 'in_normal', 'in_position']
 
     @staticmethod
     def get_data(vertices, indices):
@@ -135,6 +134,28 @@ class SkyBoxVBO(BaseVBO):
                    (0, 6, 1), (0, 5, 6)]
         vertex_data = self.get_data(vertices, indices)
         vertex_data = np.flip(vertex_data, 1).copy(order='C')
+        
+        tex_coord_vertices = [(0, 0), (1, 0), (1, 1), (0, 1)]
+        tex_coord_indices = [(0, 2, 3), (0, 1, 2),
+                             (0, 2, 3), (0, 1, 2),
+                             (0, 1, 2), (2, 3, 0),
+                             (2, 3, 0), (2, 0, 1),
+                             (0, 2, 3), (0, 1, 2),
+                             (3, 1, 2), (3, 0, 1),]
+        tex_coord_data = self.get_data(tex_coord_vertices, tex_coord_indices)
+        tex_coord_data = np.flip(tex_coord_data, 1).copy(order='C')
+
+        normals = [( 0, 0, 1) * 6,
+                   ( 1, 0, 0) * 6,
+                   ( 0, 0,-1) * 6,
+                   (-1, 0, 0) * 6,
+                   ( 0, 1, 0) * 6,
+                   ( 0,-1, 0) * 6,]
+        normals = np.array(normals, dtype='f4').reshape(36, 3)
+        normals = np.flip(normals, 1).copy(order='C')
+
+        vertex_data = np.hstack([normals, vertex_data])
+        vertex_data = np.hstack([tex_coord_data, vertex_data])
         return vertex_data
 
 

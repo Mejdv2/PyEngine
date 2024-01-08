@@ -1,0 +1,5 @@
+Created using <https://www.ambientCG.com/a/Tiles107> from <https://www.ambientCG.com>,
+licensed under the Creative Commons CC0 1.0 Universal License.
+
+Created using some code from <https://github.com/StanislavPetrovV/3D-Graphics-Engine> from <https://www.youtube.com/@CoderSpaceChannel>,
+licensed under the MIT License.

@@ -36,8 +36,8 @@ class DirectionalLight:
         # shadow matricies
         self.m_proj_light = self.get_proj_matrix()
         self.m_view_light = self.get_view_matrix()
-        self.RESOLUTION = glm.ivec2(64)
-        self.ppsm = glm.ivec2(4)
+        self.RESOLUTION = glm.ivec2(400)
+        self.ppsm = glm.ivec2(16)
         self.update_camera_vectors()
 
 
@@ -59,6 +59,6 @@ class DirectionalLight:
     
     
     def get_proj_matrix(self):
-        return glm.ortho(-110, 110, 110, -110, 0, 1000)
+        return glm.ortho(-200, 200, 200, -200, 0, 1000)
     
     
