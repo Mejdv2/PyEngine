@@ -4,6 +4,7 @@ layout (location = 0) out vec3 fragColor;
 layout (location = 1) out vec3 NormalOut;
 layout (location = 2) out vec3 PositionOut;
 layout (location = 3) out vec4 reflectionOut;
+layout (location = 4) out vec3 diffuseOut;
 
 in vec2 uv_0;
 in vec3 normal;
@@ -207,6 +208,22 @@ vec3 reflection_Calc(vec3 albedo, vec4 arms, vec3 Normal){
     return vec3((FR * brdfL.x + brdfL.y) * arms.r);
 }
 
+vec3 diffuse_Calc(vec3 albedo, vec4 arms, vec3 Normal){
+    vec3 N = normalize(Normal);
+    vec3 V = normalize(camPos - fragPos);
+
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, arms.b);
+    float cosTheta = max(dot(N, V), 0.0);
+
+    vec3 FR = fresnelSchlickRoughness(cosTheta, F0, arms.g);
+
+    vec3 kD = 1.0 - FR;
+    kD *= 1.0 - arms.b;	  
+    
+    return vec3(kD * albedo);
+}
+
 
 
 void main() {
@@ -221,6 +238,7 @@ void main() {
     NormalOut   = vec3(normalize(normal));
     PositionOut = vec3(fragPosI);
     reflectionOut = vec4(reflection_Calc(color, vec4(1, Ro, 0, 0), normal), Ro);
+    diffuseOut    = vec3(diffuse_Calc(color, vec4(1, Ro, 0, 0), normal));
 }
 
 

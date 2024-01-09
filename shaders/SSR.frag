@@ -12,11 +12,12 @@ uniform mat4 invprojection;
 
 in vec2 uv_0;
 
-out vec3 outColor;
+layout (location = 0) out vec3 ssrColor;
+layout (location = 1) out vec3 difColor;
 
 const float stepX = 3;
 const float minRayStep = 0.1;
-const float maxSteps = 15;
+const float maxSteps = 20;
 const int numBinarySearchSteps = 5;
 const float reflectionSpecularFalloffExponent = 3.0;
 
@@ -39,6 +40,7 @@ void main()
     vec2 MetallicEmmissive = vec2(0, 0);
 	bool tfon = texture2D(gPosition, uv_0.xy).z < 9999;
 	vec3 SSR = vec3(0);
+	vec3 SSI = vec3(0);
 
 	if (tfon) {
 		vec3 viewNormal = vec3(texture2D(gNormal, uv_0) * invView);
@@ -58,14 +60,9 @@ void main()
 	
 	
 		vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
+		
 	
-	
-		float screenEdgefactor = 1;
 
-		float ReflectionMultiplier =
-					screenEdgefactor * 
-					-reflected.z;
-	
 		// Get color
 		if (coords.x > 0.001 && coords.y > 0.001 && coords.x < 0.999 && coords.y < 0.999 &&
             coords.z < 0 && (dDepth < stepX || dDepth > 900) ) {
@@ -74,9 +71,34 @@ void main()
             SSR = textureCube(envMap, vec3(reflected * inverse(mat3(invView)))).rgb;
             SSR = pow(SSR, vec3(2.2));
         }
+
+
+        
+		// Diffuse vector
+		vec3 diffused = normalize(viewNormal);
+
+
+		hitPos = viewPos;
+		dDepth = 0.0;
+	
+		wp = vec3(vec4(viewPos, 1.0) * invView);
+		coords = RayCast(diffused * max(minRayStep, -viewPos.z), hitPos, dDepth);
+	
+	
+		dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
+	
+		// Get color
+		if (false /*coords.x > 0.001 && coords.y > 0.001 && coords.x < 0.999 && coords.y < 0.999 &&
+            coords.z < 0 && (dDepth < stepX || dDepth > 900*/) {
+			SSI = (textureLod(gfi, coords.xy, 8).rgb).rgb; 
+		} else {
+            SSI = textureLod(envMap, vec3(diffused * inverse(mat3(invView))), 1000).rgb;
+            SSI = pow(SSI, vec3(2.2));
+        }
 	}
 
-    outColor = vec3(SSR);
+    ssrColor = vec3(SSR);
+    difColor = vec3(SSI);
 }
 
 vec3 PositionFromDepth(float depth) {

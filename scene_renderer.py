@@ -15,12 +15,14 @@ class SceneRenderer:
         self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
         self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
         self.rfm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2, comps=4)
+        self.dfm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
         self.SSRO:mgl.Texture        = self.mesh.texture.get_render_texture(app.WIN_SIZE)
+        self.SSIO:mgl.Texture        = self.mesh.texture.get_render_texture(app.WIN_SIZE)
 
         self.depth_fbo       = self.ctx.framebuffer(depth_attachment=self.depth_texture)
-        self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, 
-                                                                                                          self.pos_texture, self.rfm_texture])
-        self.render_fbo_ssrc = self.ctx.framebuffer(color_attachments=[self.SSRO])
+        self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, self.pos_texture, 
+                                                                                                          self.rfm_texture, self.dfm_texture])
+        self.render_fbo_ssrc = self.ctx.framebuffer(color_attachments=[self.SSRO, self.SSIO])
 
     def render_shadow(self):
         self.depth_fbo.clear()
@@ -46,9 +48,11 @@ class SceneRenderer:
             self.scene.screen.render_SSR(self.crt_texture, self.nrm_texture, self.pos_texture)
             self.SSRO.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
             self.SSRO.build_mipmaps(0, 8)
+            self.SSIO.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+            self.SSIO.build_mipmaps(0, 5)
 
         self.ctx.screen.use()
-        self.scene.screen.render(self.crt_texture, self.SSRO, self.rfm_texture, SSR)
+        self.scene.screen.render(self.crt_texture, self.SSRO, self.SSIO, self.rfm_texture, self.dfm_texture, SSR)
 
     def render(self):
         self.scene.update()
@@ -68,17 +72,20 @@ class SceneRenderer:
         self.pos_texture.release()
         self.rfm_texture.release()
         self.SSRO.release()
+        self.SSIO.release()
 
-        self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(self.app.WIN_SIZE)
-        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE)
-        self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE)
-        self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE)
-        self.rfm_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE)
+        self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(self.app.WIN_SIZE * 2)
+        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2)
+        self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2)
+        self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2)
+        self.rfm_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2, comps=4)
+        self.dfm_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2)
         self.SSRO:mgl.Texture        = self.mesh.texture.get_render_texture(self.app.WIN_SIZE)
+        self.SSIO:mgl.Texture        = self.mesh.texture.get_render_texture(self.app.WIN_SIZE)
 
-        self.render_fbo = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, 
-                                                                                                     self.pos_texture, self.rfm_texture])
-        self.render_fbo_ssrc = self.ctx.framebuffer(color_attachments=[self.SSRO])
+        self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, self.pos_texture, 
+                                                                                                          self.rfm_texture, self.dfm_texture])
+        self.render_fbo_ssrc = self.ctx.framebuffer(color_attachments=[self.SSRO, self.SSIO])
 
 
     def destroy(self):

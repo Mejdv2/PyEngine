@@ -7,6 +7,7 @@ class VBO:
     def __init__(self, ctx):
         self.vbos = {}
         self.vbos['cube'] = CubeVBO(ctx)
+        self.vbos['Icube'] = InvCubeVBO(ctx)
         self.vbos['screen'] = ScreenVBO(ctx)
         self.vbos['obj'] = ObjVBO(ctx)
         self.vbos['advanced_skybox'] = AdvancedSkyBoxVBO(ctx)

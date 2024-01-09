@@ -42,6 +42,16 @@ class VAO:
             program=self.program.programs['shadow_map'],
             vbo=self.vbo.vbos['obj'])
 
+        # obj vao
+        self.vaos['Iobj'] = self.get_vao(
+            program=self.program.programs['default'],
+            vbo=self.vbo.vbos['Icube'])
+
+        # shadow obj vao
+        self.vaos['shadow_Iobj'] = self.get_vao(
+            program=self.program.programs['shadow_map'],
+            vbo=self.vbo.vbos['Icube'])
+
         # advanced_skybox vao
         self.vaos['advanced_skybox'] = self.get_vao(
             program=self.program.programs['advanced_skybox'],

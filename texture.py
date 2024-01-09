@@ -8,7 +8,8 @@ class Texture:
         self.app = app
         self.ctx:mgl.Context = app.ctx
         self.textures = {}
-        self.textures['cat'] = self.get_texture(path='textures/tiles/Tiles107_1K-PNG_ColorR.png')
+        self.textures['floor'] = self.get_texture(path='textures/tiles/Tiles107_1K-PNG_ColorR.png')
+        self.textures['diff'] = self.get_texture(path='objects/sphere/diff_v1.jpg')
         self.textures['rough'] = self.get_texture(path='textures/tiles/Tiles107_1K-PNG_Roughness.png')
         self.textures['brdfLUT'] = self.get_texture(path='ibl_brdf_lut.png')
         self.textures['brdfLUT'].repeat_x = False 
@@ -50,6 +51,10 @@ class Texture:
         for i in range(6):
             texture_data = pg.image.tostring(textures[i], 'RGB')
             texture_cube.write(face=i, data=texture_data)
+
+            
+        texture_cube.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+        texture_cube.build_mipmaps()
 
         return texture_cube
 

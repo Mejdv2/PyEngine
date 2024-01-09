@@ -145,14 +145,19 @@ class Screen:
 
         
 
-    def render(self, frame:mgl.Texture, SSR:mgl.Texture, RM:mgl.Texture, use_SSR):
+    def render(self, frame:mgl.Texture, SSR:mgl.Texture, SSI:mgl.Texture, RM:mgl.Texture, DM:mgl.Texture, use_SSR):
         self.program['u_color'] = 1
         self.program['u_SSR'] = 2
-        self.program['u_rm'] = 3
+        self.program['u_SSI'] = 3
+        self.program['u_rm'] = 4
+        self.program['u_dm'] = 5
         self.program['use_SSR'].write(glm.bool_(use_SSR))
+
         frame.use(location=1)
         SSR.use(location=2)
-        RM.use(location=3)
+        SSI.use(location=3)
+        RM.use(location=4)
+        SSI.use(location=5)
 
 
         self.vao.render()
@@ -161,7 +166,13 @@ class Screen:
 
 
 class Cube(ExtendedBaseModel):
-    def __init__(self, app, vao_name='cube', tex_id='cat',
+    def __init__(self, app, vao_name='cube', tex_id='floor',
+                 pos=(0, 0, 0), rot=(0, 0, 0), scale=(1, 1, 1)):
+        super().__init__(app, vao_name, tex_id, pos, rot, scale)
+
+        
+class Sphere(ExtendedBaseModel):
+    def __init__(self, app, vao_name='obj', tex_id='floor',
                  pos=(0, 0, 0), rot=(0, 0, 0), scale=(1, 1, 1)):
         super().__init__(app, vao_name, tex_id, pos, rot, scale)
 
