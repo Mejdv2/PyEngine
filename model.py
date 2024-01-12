@@ -41,7 +41,7 @@ class ExtendedBaseModel(BaseModel):
         self.on_init()
 
     def update(self):
-        self.program['camPos'].write(self.camera.position)
+#        self.program['camPos'].write(self.camera.position)
 
         self.program['m_proj'].write(self.camera.m_proj)
         self.program['m_view'].write(self.camera.m_view)
@@ -52,18 +52,18 @@ class ExtendedBaseModel(BaseModel):
         self.program['u_texture_0'] = 0
         self.texture.use(location=0)
         # texture
-        self.texture = self.app.mesh.texture.textures['rough']
-        self.program['u_texture_1'] = 1
-        self.texture.use(location=1)
+        #self.texture = self.app.mesh.texture.textures['rough']
+        #self.program['u_texture_1'] = 1
+        #self.texture.use(location=1)
 
 
-        self.program['u_brdfLUT'] = 9
-        self.brdfLUT.use(location=9)
+        #self.program['u_brdfLUT'] = 9
+        #self.brdfLUT.use(location=9)
 
-        self.program['shadowMap'] = 10
-        self.depth_texture.use(location=10)
+#        self.program['shadowMap'] = 10
+#        self.depth_texture.use(location=10)
         
-        self.depth_texture = self.app.mesh.texture.textures['depth_texture']
+#        self.depth_texture = self.app.mesh.texture.textures['depth_texture']
         
 
     def update_shadow(self):
@@ -74,15 +74,15 @@ class ExtendedBaseModel(BaseModel):
         self.shadow_vao.render()
 
     def on_init(self):
-        self.program['m_proj_light'].write(self.app.light.m_proj_light)
-        self.program['m_view_light'].write(self.app.light.m_view_light)
-        # resolution
-        self.program['u_resolution'].write(glm.vec2(self.app.light.RESOLUTION*self.app.light.ppsm))
-        # depth texture
-        self.depth_texture = self.app.mesh.texture.textures['depth_texture']
-        self.program['shadowMap'] = 10
-        self.depth_texture.use(location=10)
-        # shadow
+#        self.program['m_proj_light'].write(self.app.light.m_proj_light)
+#        self.program['m_view_light'].write(self.app.light.m_view_light)
+#        # resolution
+#        self.program['u_resolution'].write(glm.vec2(self.app.light.RESOLUTION*self.app.light.ppsm))
+#        # depth texture
+#        self.depth_texture = self.app.mesh.texture.textures['depth_texture']
+#        self.program['shadowMap'] = 10
+#        self.depth_texture.use(location=10)
+#        # shadow
         self.shadow_vao = self.app.mesh.vao.vaos['shadow_' + self.vao_name]
         self.shadow_program = self.shadow_vao.program
         self.shadow_program['m_proj_light'].write(self.app.light.m_proj_light)
@@ -93,20 +93,20 @@ class ExtendedBaseModel(BaseModel):
         self.program['u_texture_0'] = 0
         self.texture.use(location=0)
         # texture
-        self.texture = self.app.mesh.texture.textures['rough']
-        self.program['u_texture_1'] = 1
-        self.texture.use(location=1)
+#        self.texture = self.app.mesh.texture.textures['rough']
+#        self.program['u_texture_1'] = 1
+#        self.texture.use(location=1)
         # brdf
-        self.brdfLUT = self.app.mesh.texture.textures['brdfLUT']
-        self.program['u_brdfLUT'] = 9
-        self.brdfLUT.use(location=9)
+#        self.brdfLUT = self.app.mesh.texture.textures['brdfLUT']
+#        self.program['u_brdfLUT'] = 9
+#        self.brdfLUT.use(location=9)
         # mvp
         self.program['m_proj'].write(self.camera.m_proj)
         self.program['m_view'].write(self.camera.m_view)
         self.program['m_model'].write(self.m_model)
         # light
-        self.program['light.direction'].write(self.app.light.direction)
-        self.program['light.color'].write(self.app.light.color)
+#        self.program['light.direction'].write(self.app.light.direction)
+#        self.program['light.color'].write(self.app.light.color)
 
 
 
@@ -118,9 +118,9 @@ class Screen:
         self.vao:mgl.VertexArray = app.mesh.vao.vaos['screen']
         self.program = self.vao.program
 
-        self.vao_name_SSR = 'SSR'
-        self.vao_SSR:mgl.VertexArray = app.mesh.vao.vaos['SSR']
-        self.program_SSR = self.vao_SSR.program
+        #self.vao_name_SSR = 'SSR'
+        #self.vao_SSR:mgl.VertexArray = app.mesh.vao.vaos['SSR']
+        #self.program_SSR = self.vao_SSR.program
 
     def update(self): ...
 
@@ -145,21 +145,10 @@ class Screen:
 
         
 
-    def render(self, frame:mgl.Texture, SSR:mgl.Texture, SSI:mgl.Texture, RM:mgl.Texture, DM:mgl.Texture, use_SSR):
+    def render(self, frame:mgl.Texture):
         self.program['u_color'] = 1
-        self.program['u_SSR'] = 2
-        self.program['u_SSI'] = 3
-        self.program['u_rm'] = 4
-        self.program['u_dm'] = 5
-        self.program['use_SSR'].write(glm.bool_(use_SSR))
 
         frame.use(location=1)
-        SSR.use(location=2)
-        SSI.use(location=3)
-        RM.use(location=4)
-        SSI.use(location=5)
-
-
         self.vao.render()
 
 

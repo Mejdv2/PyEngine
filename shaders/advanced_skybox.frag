@@ -13,6 +13,6 @@ uniform mat4 m_invProjView;
 void main() {
     vec4 worldCoords = m_invProjView * clipCoords;
     vec3 texCubeCoord = normalize(worldCoords.xyz / worldCoords.w);
-    fragColor = pow(textureCube(u_texture_skybox, texCubeCoord).rgb, vec3(2.2));
+    fragColor = pow(textureCube(u_texture_skybox, texCubeCoord).rgb, vec3(1));
     PositionOut = vec3(0, 0, 10000);
 }

@@ -3,14 +3,14 @@
 layout (location = 0) out vec3 fragColor;
 layout (location = 1) out vec3 NormalOut;
 layout (location = 2) out vec3 PositionOut;
-layout (location = 3) out vec4 reflectionOut;
-layout (location = 4) out vec3 diffuseOut;
 
 in vec2 uv_0;
 in vec3 normal;
 in vec3 fragPos;
-in vec3 fragPosI;
-in vec4 shadowCoord;
+
+uniform sampler2D u_texture_0;
+
+/*
 
 struct Light {
     vec3 direction;
@@ -20,7 +20,6 @@ struct Light {
 uniform Light light;
 uniform vec3 camPos;
 
-uniform sampler2D u_texture_0;
 uniform sampler2D u_texture_1;
 uniform sampler2D u_brdfLUT;
 uniform sampler2DShadow shadowMap;
@@ -78,7 +77,7 @@ float getShadow() {
     return shadow;
 }
 
-/*
+
 vec3 getLight(vec3 color) {
     vec3 Normal = normalize(normal);
 
@@ -104,7 +103,7 @@ vec3 getLight(vec3 color) {
 }
 */
 
-
+/*
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -223,22 +222,16 @@ vec3 diffuse_Calc(vec3 albedo, vec4 arms, vec3 Normal){
     
     return vec3(kD * albedo);
 }
-
+*/
 
 
 void main() {
     float gamma = 2.2;
     vec3 color  = texture2D(u_texture_0, uv_0).rgb;
-    float Ro    = clamp(texture2D(u_texture_1, uv_0).r, 0.05, 1);
-    color       = pow(color, vec3(gamma));
-
-    color       = CalcLight(color, vec4(1, Ro, 0, 0), normal, getSoftShadowX64());
 
     fragColor   = vec3(color);
     NormalOut   = vec3(normalize(normal));
-    PositionOut = vec3(fragPosI);
-    reflectionOut = vec4(reflection_Calc(color, vec4(1, Ro, 0, 0), normal), Ro);
-    diffuseOut    = vec3(diffuse_Calc(color, vec4(1, Ro, 0, 0), normal));
+    PositionOut = vec3(fragPos);
 }
 
 

@@ -15,11 +15,6 @@ class VAO:
             program=self.program.programs['screen'],
             vbo = self.vbo.vbos['screen'])
         
-
-        # cube vao
-        self.vaos['SSR'] = self.get_vao(
-            program=self.program.programs['SSR'],
-            vbo = self.vbo.vbos['screen'])
         
 
         # cube vao
