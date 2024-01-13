@@ -8,20 +8,25 @@ class SceneRenderer:
         self.mesh = app.mesh
         self.scene = app.scene
         # depth buffer
-        self.depth_texture = self.mesh.texture.textures['depth_texture']
+        self.depth_texture = self.mesh.texture.textures['depth_texture'] # Directional Light Texture
 
         self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(app.WIN_SIZE  * 2) # Depth
-        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Color
+        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Colour
         self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Normal
         self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Position
 
+        self.shadow_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Shadow
 
-        self.shadow_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
-
+        
+        self.SSRO:mgl.Texture        = self.mesh.texture.get_render_texture(app.WIN_SIZE) # Screen-Space Reflection (Lighty Photon Go Bouncy Bounce
+#                                                                                                                    Real Bounce Screen Bounce Real)
 
         self.depth_fbo       = self.ctx.framebuffer(depth_attachment=self.depth_texture)
         self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, self.pos_texture,
                                                                                                           self.shadow_texture])
+        
+
+        self.render_fbo_ssrc = self.ctx.framebuffer(color_attachments=[self.SSRO])
 
     def render_shadow(self):
         self.depth_fbo.clear()
@@ -40,9 +45,18 @@ class SceneRenderer:
         self.crt_texture.build_mipmaps(0, 8)
 
         
-    def process_render(self):
+    def process_render(self): 
+        if (SSR):
+            self.render_fbo_ssrc.clear()
+            self.render_fbo_ssrc.use()
+            self.scene.screen.render_SSR(self.crt_texture, self.nrm_texture, self.pos_texture)
+            self.SSRO.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+            self.SSRO.build_mipmaps(0, 8)
+
+
         self.ctx.screen.use()
-        self.scene.screen.render(self.crt_texture, self.nrm_texture, self.pos_texture, self.shadow_texture)
+        self.scene.screen.render(self.crt_texture, self.nrm_texture, self.pos_texture, self.shadow_texture,
+                                 self.SSRO)
 
     def render(self):
         self.scene.update()

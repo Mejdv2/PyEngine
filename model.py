@@ -123,9 +123,11 @@ class Screen:
         self.vao:mgl.VertexArray = app.mesh.vao.vaos['screen']
         self.program = self.vao.program
 
-        #self.vao_name_SSR = 'SSR'
-        #self.vao_SSR:mgl.VertexArray = app.mesh.vao.vaos['SSR']
-        #self.program_SSR = self.vao_SSR.program
+        self.vao_name_SSR = 'SSR'
+        self.vao_SSR:mgl.VertexArray = app.mesh.vao.vaos['SSR']
+        self.program_SSR = self.vao_SSR.program
+
+        self.brdfLUT = self.app.mesh.texture.textures['brdfLUT']
 
     def update(self): ...
 
@@ -142,6 +144,7 @@ class Screen:
         mp = self.app.camera.m_proj
         
         self.program_SSR['projection'].write(mp)
+        self.program_SSR['view'].write(mv)
         self.program_SSR['invView'].write(glm.inverse(mv))
         
 
@@ -150,11 +153,16 @@ class Screen:
 
         
 
-    def render(self, frame:mgl.Texture, norm:mgl.Texture, pos:mgl.Texture, shadow:mgl.Texture):
+    def render(self, frame:mgl.Texture, norm:mgl.Texture, pos:mgl.Texture, shadow:mgl.Texture,
+                     SSRO:mgl.Texture):
         self.program['u_color']   = 1
         self.program['u_norm']    = 2
         self.program['u_pos']     = 3
         self.program['u_shadows'] = 4
+        self.program['u_SSR'] = 5
+        
+        self.program['u_brdfLUT'] = 9
+        self.brdfLUT.use(location=9)
 
         self.program['camPos'].write(self.app.camera.position)
         self.program['light.direction'].write(self.app.light.forward)
@@ -165,6 +173,7 @@ class Screen:
         pos.use(location=3)
 
         shadow.use(location=4)
+        SSRO.use(location=5)
 
         self.vao.render()
 
