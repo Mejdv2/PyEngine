@@ -3,25 +3,15 @@
 layout (location = 0) out vec3 fragColor;
 layout (location = 1) out vec3 NormalOut;
 layout (location = 2) out vec3 PositionOut;
+layout (location = 3) out vec3 shadowOut;
 
 in vec2 uv_0;
 in vec3 normal;
 in vec3 fragPos;
+in vec4 shadowCoord;
 
 uniform sampler2D u_texture_0;
 
-/*
-
-struct Light {
-    vec3 direction;
-    vec3 color;
-};
-
-uniform Light light;
-uniform vec3 camPos;
-
-uniform sampler2D u_texture_1;
-uniform sampler2D u_brdfLUT;
 uniform sampler2DShadow shadowMap;
 uniform vec2 u_resolution;
 
@@ -76,6 +66,20 @@ float getShadow() {
     float shadow = textureProj(shadowMap, shadowCoord);
     return shadow;
 }
+
+/*
+
+struct Light {
+    vec3 direction;
+    vec3 color;
+};
+
+uniform Light light;
+uniform vec3 camPos;
+
+uniform sampler2D u_texture_1;
+uniform sampler2D u_brdfLUT;
+
 
 
 vec3 getLight(vec3 color) {
@@ -232,6 +236,7 @@ void main() {
     fragColor   = vec3(color);
     NormalOut   = vec3(normalize(normal));
     PositionOut = vec3(fragPos);
+    shadowOut   = vec3(getSoftShadowX16(), 0, 0);
 }
 
 

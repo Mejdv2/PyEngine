@@ -33,7 +33,7 @@ class GraphicsEngine:
         # camera
         self.camera = Camera(self)
         # light
-        self.light = DirectionalLight(self, (-45, -45, -45))
+        self.light = DirectionalLight(self, (-45, -45, 0))
         # mesh
         self.mesh = Mesh(self)
         # scene

@@ -10,13 +10,18 @@ class SceneRenderer:
         # depth buffer
         self.depth_texture = self.mesh.texture.textures['depth_texture']
 
-        self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(app.WIN_SIZE * 2)
-        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
-        self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
-        self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
+        self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(app.WIN_SIZE  * 2) # Depth
+        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Color
+        self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Normal
+        self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Position
+
+
+        self.shadow_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2)
+
 
         self.depth_fbo       = self.ctx.framebuffer(depth_attachment=self.depth_texture)
-        self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, self.pos_texture])
+        self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, self.pos_texture,
+                                                                                                          self.shadow_texture])
 
     def render_shadow(self):
         self.depth_fbo.clear()
@@ -37,7 +42,7 @@ class SceneRenderer:
         
     def process_render(self):
         self.ctx.screen.use()
-        self.scene.screen.render(self.crt_texture)
+        self.scene.screen.render(self.crt_texture, self.nrm_texture, self.pos_texture, self.shadow_texture)
 
     def render(self):
         self.scene.update()
