@@ -41,7 +41,6 @@ class ExtendedBaseModel(BaseModel):
         self.on_init()
 
     def update(self):
-#        self.program['camPos'].write(self.camera.position)
 
         self.program['m_proj'].write(self.camera.m_proj)
         self.program['m_view'].write(self.camera.m_view)
@@ -67,9 +66,12 @@ class ExtendedBaseModel(BaseModel):
         self.depth_texture.use(location=10)
         
         self.depth_texture = self.app.mesh.texture.textures['depth_texture']
+
         
 
     def update_shadow(self):
+        self.shadow_program['m_proj_light'].write(self.app.light.m_proj_light)
+        self.shadow_program['m_view_light'].write(self.app.light.m_view_light)
         self.shadow_program['m_model'].write(self.m_model)
 
     def render_shadow(self):
@@ -155,7 +157,7 @@ class Screen:
         self.program['u_shadows'] = 4
 
         self.program['camPos'].write(self.app.camera.position)
-        self.program['light.direction'].write(self.app.light.direction)
+        self.program['light.direction'].write(self.app.light.forward)
         self.program['light.color'].write(self.app.light.color)
 
         frame.use(location=1)

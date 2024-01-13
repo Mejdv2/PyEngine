@@ -15,8 +15,6 @@ uniform mat4 m_view_light;
 uniform mat4 m_proj_light;
 uniform mat4 m_model;
 
-uniform vec2 nf;
-
 mat4 m_shadow_bias = mat4(
     0.5, 0.0, 0.0, 0.0,
     0.0, 0.5, 0.0, 0.0,
@@ -28,7 +26,7 @@ mat4 m_shadow_bias = mat4(
 void main() {
     uv_0 = in_texcoord_0;
     fragPos = vec3(m_model * vec4(in_position, 1.0));
-    
+
     normal = mat3(transpose(inverse(m_model))) * normalize(in_normal);
     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
 
