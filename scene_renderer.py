@@ -18,7 +18,7 @@ class SceneRenderer:
         self.shadow_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Shadow
 
         
-        self.SSRO:mgl.Texture        = self.mesh.texture.get_render_texture(app.WIN_SIZE) # Screen-Space Reflection (Lighty Photon Go Bouncy Bounce
+        self.SSRO:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Screen-Space Reflection (Lighty Photon Go Bouncy Bounce
 #                                                                                                                    Real Bounce Screen Bounce Real)
 
         self.depth_fbo       = self.ctx.framebuffer(depth_attachment=self.depth_texture)
@@ -41,17 +41,12 @@ class SceneRenderer:
             obj.render()
         self.scene.skybox.render()
 
-        self.crt_texture.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
-        self.crt_texture.build_mipmaps(0, 8)
-
         
     def process_render(self): 
         if (SSR):
             self.render_fbo_ssrc.clear()
             self.render_fbo_ssrc.use()
-            self.scene.screen.render_SSR(self.crt_texture, self.nrm_texture, self.pos_texture)
-            self.SSRO.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
-            self.SSRO.build_mipmaps(0, 8)
+            self.scene.screen.render_SSR(self.nrm_texture, self.pos_texture)
 
 
         self.ctx.screen.use()
@@ -68,18 +63,31 @@ class SceneRenderer:
         self.process_render()
 
     def resize(self):
+        self.SSRO.release()
         self.render_fbo.release()
         self.drt_texture.release()
         self.crt_texture.release()
         self.nrm_texture.release()
         self.pos_texture.release()
+        self.shadow_texture.release()
+        
+        self.SSRO:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2) # Screen-Space Reflection (Lighty Photon Go Bouncy Bounce
+#                                                                                                                    Real Bounce Screen Bounce Real)
+        
+        self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(self.app.WIN_SIZE  * 2) # Depth
+        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2) # Colour
+        self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2) # Normal
+        self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2) # Position
 
-        self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(self.app.WIN_SIZE * 2)
-        self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2)
-        self.nrm_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2)
-        self.pos_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2)
+        self.shadow_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2) # Shadow
 
-        self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, self.pos_texture])
+        
+        
+        self.render_fbo_ssrc = self.ctx.framebuffer(color_attachments=[self.SSRO])
+        self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, self.pos_texture,
+                                                                                                          self.shadow_texture])
+        
+
 
     def destroy(self):
         self.depth_fbo.release()

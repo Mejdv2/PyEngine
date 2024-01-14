@@ -1,4 +1,5 @@
 #version 330 core
+#extension GL_NV_shadow_samplers_cube : enable
 
 in vec2 uv_0;
 layout (location = 0) out vec4 fragColor;
@@ -17,12 +18,16 @@ uniform sampler2D u_shadows;
 uniform sampler2D u_SSR;
 
 uniform sampler2D u_brdfLUT;
+uniform samplerCube skybox;
+
+
+
 
 
 uniform Light light;
 uniform vec3 camPos;
 
-
+uniform mat4 view;
 
 
 const float PI = 3.14159265359;
@@ -83,10 +88,10 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 
 
 
-vec3 CalcLight(vec3 albedo, vec4 arms, vec3 Normal, vec3 fragPos)
+vec3 CalcLight(vec3 albedo, vec4 arms, vec3 Normal, vec3 fragPos, vec3 camiPos)
 {		
     vec3 N = normalize(Normal);
-    vec3 V = normalize(camPos - fragPos);
+    vec3 V = normalize(camiPos - fragPos);
    
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, arms.b);
@@ -125,9 +130,9 @@ vec3 CalcLight(vec3 albedo, vec4 arms, vec3 Normal, vec3 fragPos)
 }
 
 
-vec3 reflection_Calc(vec3 albedo, vec3 arm, vec3 Normal, vec3 fragPos){
+vec3 reflection_Calc(vec3 albedo, vec3 arm, vec3 Normal, vec3 fragPos, vec3 camiPos){
     vec3 N = normalize(Normal);
-    vec3 V = normalize(camPos - fragPos);
+    vec3 V = normalize(camiPos - fragPos);
 
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, arm.b);
@@ -143,21 +148,46 @@ vec3 reflection_Calc(vec3 albedo, vec3 arm, vec3 Normal, vec3 fragPos){
 
 
 void main() {
-    vec3 color  = texture2D(u_color,   uv_0).rgb;
-    vec3 norm   = texture2D(u_norm,    uv_0).rgb;
-    vec3 pos    = texture2D(u_pos,     uv_0).rgb;
-    vec3 shadow = texture2D(u_shadows, uv_0).rgb;
-    vec3 ssr    = texture2D(u_SSR,     uv_0).rgb;
+    vec3 color   = texture2D(u_color,   uv_0).rgb;
+    vec3 norm    = texture2D(u_norm,    uv_0).rgb;
+    vec3 pos     = texture2D(u_pos,     uv_0).rgb;
+    vec3 shadow  = texture2D(u_shadows, uv_0).rgb;
+    vec3 ssr_uv  = texture2D(u_SSR,     uv_0).rgb;
+
+    vec3 ssr_color;
+    vec3 ssr_norm;
+    vec3 ssr_pos;
+    vec3 ssr_shadow;
+
+    vec3 arm    = vec3(1, 0.05, color.b);
+    vec3 ss_arm;
+    
+    if (ssr_uv.z > 0.9) {
+        ssr_color  = texture2D(u_color,   ssr_uv.xy).rgb;
+        ssr_norm   = texture2D(u_norm,    ssr_uv.xy).rgb;
+        ssr_pos    = texture2D(u_pos,     ssr_uv.xy).rgb;
+        ssr_shadow = texture2D(u_shadows, ssr_uv.xy).rgb;
+
+        ss_arm     = vec3(1, 0.05, ssr_color.b);
+    }  else  {
+        vec3 reflectDir = reflect(-normalize(camPos - pos), norm);
+        ssr_color  = textureCube(skybox, reflectDir).rgb;
+    }
 
     if (norm == vec3(0)) {
         fragColor = vec4(color, 1.0); // if the normal vector isn't defined (Like skybox), lighting is skipped
 
     } else {
-
         vec3 outColor = pow(color, vec3(gamma));
 
-        outColor  = CalcLight(outColor, vec4(1, 0.05, 0, shadow.r), norm, pos);
-        outColor += reflection_Calc(outColor, vec3(1, 0.05, 0), norm, pos) * ssr;
+        outColor  = CalcLight(outColor, vec4(1, 0.05, outColor.b, shadow.r), norm, pos, camPos);
+
+        if (ssr_norm != vec3(0)) {
+            outColor += reflection_Calc(outColor, vec3(arm), norm, pos, camPos) * 
+                        CalcLight(ssr_color, vec4(ss_arm, ssr_shadow.r), ssr_norm, ssr_pos, pos);
+        } else {
+            outColor += reflection_Calc(outColor, vec3(arm), norm, pos, camPos) * ssr_color;
+        }
 
         outColor  = pow(outColor, vec3(1/gamma));
 

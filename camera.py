@@ -38,6 +38,7 @@ class Camera:
         pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
         if rmd:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_SIZEALL)
+        self.update_camera_vectors()
 
         self.yaw += rel_x * SENSITIVITY * rmd
         self.pitch -= rel_y * SENSITIVITY * rmd
@@ -57,7 +58,6 @@ class Camera:
     def update(self):
         self.move()
         self.rotate()
-        self.update_camera_vectors()
         self.m_view = self.get_view_matrix()
 
     def move(self):

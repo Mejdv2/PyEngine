@@ -128,17 +128,17 @@ class Screen:
         self.program_SSR = self.vao_SSR.program
 
         self.brdfLUT = self.app.mesh.texture.textures['brdfLUT']
+        self.skybox = self.app.mesh.texture.textures['skybox']
 
     def update(self): ...
 
-    def render_SSR(self, frame:mgl.Texture, norm:mgl.Texture, pos:mgl.Texture):
+    def render_SSR(self, norm:mgl.Texture, pos:mgl.Texture):
         self.update()
-        self.program_SSR['gNormal'] = 2
-        self.program_SSR['gPosition'] = 3
-        self.program_SSR['gfi'] = 1
-        frame.use(location=1)
-        norm.use(location=2)
-        pos.use(location=3)
+        self.program_SSR['gNormal'] = 1
+        self.program_SSR['gPosition'] = 2
+
+        norm.use(location=1)
+        pos.use(location=2)
         
         mv = self.app.camera.m_view
         mp = self.app.camera.m_proj
@@ -147,7 +147,6 @@ class Screen:
         self.program_SSR['view'].write(mv)
         self.program_SSR['invView'].write(glm.inverse(mv))
         
-
 
         self.vao_SSR.render()
 
@@ -163,6 +162,9 @@ class Screen:
         
         self.program['u_brdfLUT'] = 9
         self.brdfLUT.use(location=9)
+        
+        self.program['skybox'] = 10
+        self.skybox.use(location=10)
 
         self.program['camPos'].write(self.app.camera.position)
         self.program['light.direction'].write(self.app.light.forward)

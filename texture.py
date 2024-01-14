@@ -54,7 +54,7 @@ class Texture:
 
             
         texture_cube.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
-        texture_cube.build_mipmaps()
+        texture_cube.build_mipmaps(max_level=64)
 
         return texture_cube
 

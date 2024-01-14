@@ -13,12 +13,12 @@ uniform mat4 invProjection;
 
 in vec2 uv_0;
 
-layout (location = 0) out vec3 ssrColor;
+layout (location = 0) out vec3 uvPos;
 
 const float stepX = 1;
 const float minRayStep = 0.1;
 const float maxSteps = 25;
-const int numBinarySearchSteps = 5;
+const int numBinarySearchSteps = 10;
 const float reflectionSpecularFalloffExponent = 3.0;
 
 const float far = 1000;
@@ -37,41 +37,30 @@ vec4 RayCast(vec3 dir, inout vec3 hitCoord, out float dDepth);
 void main()
 {
 
-    vec2 MetallicEmmissive = vec2(0, 0);
-	bool tfon = texture2D(gPosition, uv_0.xy).z < far;
-	vec3 SSR = vec3(0);
+    vec3 pos = texture2D(gPosition, uv_0).xyz;
+    vec3 norm = normalize(texture2D(gNormal, uv_0).xyz);
 
-	if (tfon) {
-		vec3 viewNormal = vec3(vec4(texture2D(gNormal, uv_0).xyz, 1) * invView);
-		vec3 viewPos = vec3(view * vec4(texture2D(gPosition, uv_0).xyz, 1));
-		vec3 albedo = texture2D(gfi, uv_0).rgb;
+    vec3 viewNormal = normalize(vec3(vec4(norm, 1) * invView));
+    vec3 viewPos = vec3(view * vec4(pos, 1));
 
+    // Reflection vector
+    vec3 reflected = normalize(reflect(normalize(viewPos), viewNormal));
+	vec3 UV  = vec3(0);
 
-		// Reflection vector
-		vec3 reflected = normalize(reflect(normalize(viewPos), normalize(viewNormal)));
-
-
-		vec3 hitPos = viewPos;
+	if (norm != vec3(0)) {
+        vec3 hitPos = viewPos;
 		float dDepth;
 	
-		vec3 wp = vec3(vec4(viewPos, 1.0) * invView);
-		vec4 coords = RayCast(reflected * max(minRayStep, -viewPos.z), hitPos, dDepth);
-	
-	
-		vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
-		
+		vec4 coords = RayCast(reflected * max(minRayStep, -viewPos.z), hitPos, dDepth);		
 	
 
 		// Get color
 		if (coords.x > 0.001 && coords.y > 0.001 && coords.x < 0.999 && coords.y < 0.999 &&
-            coords.z < 0 && (dDepth < stepX || dDepth > far) ) {
-			SSR = (texture2D(gfi, coords.xy).rgb).rgb; 
-		} else {
-            SSR = textureCube(envMap, vec3(reflected * mat3(view))).rgb;
+            coords.z < 0 && (dDepth < stepX || dDepth > far) && coords.w > 0.9) {
+			UV = vec3(coords.xy, 1); 
         }
-	}
-
-    ssrColor = vec3(SSR);
+        uvPos = UV;
+    }
 }
 
 vec3 PositionFromDepth(float depth) {
@@ -145,7 +134,7 @@ vec4 RayCast(vec3 dir, inout vec3 hitCoord, out float dDepth)
 
         if((dir.z - dDepth) < 1.2)
         {
-            if(dDepth <= 0.0)
+            if(dDepth < stepX && dDepth > -stepX)
             {   
                 vec4 Result;
                 Result = vec4(BinarySearch(dir, hitCoord, dDepth), 1.0);
