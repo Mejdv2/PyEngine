@@ -18,8 +18,8 @@ class SceneRenderer:
         self.shadow_texture:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Shadow
 
         
-        self.SSRO:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE * 2) # Screen-Space Reflection (Lighty Photon Go Bouncy Bounce
-#                                                                                                                    Real Bounce Screen Bounce Real)
+        self.SSRO:mgl.Texture = self.mesh.texture.get_render_texture(app.WIN_SIZE / 1.5) # Screen-Space Reflection (Lighty Photon Go Bouncy Bounce
+#                                                                                                                 Real Bounce Screen Bounce Real)
 
         self.depth_fbo       = self.ctx.framebuffer(depth_attachment=self.depth_texture)
         self.render_fbo      = self.ctx.framebuffer(depth_attachment=self.drt_texture, color_attachments=[self.crt_texture, self.nrm_texture, self.pos_texture,
@@ -47,6 +47,9 @@ class SceneRenderer:
             self.render_fbo_ssrc.clear()
             self.render_fbo_ssrc.use()
             self.scene.screen.render_SSR(self.nrm_texture, self.pos_texture)
+            
+            self.SSRO.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+            self.SSRO.build_mipmaps(max_level=8)
 
 
         self.ctx.screen.use()
@@ -71,8 +74,8 @@ class SceneRenderer:
         self.pos_texture.release()
         self.shadow_texture.release()
         
-        self.SSRO:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2) # Screen-Space Reflection (Lighty Photon Go Bouncy Bounce
-#                                                                                                                    Real Bounce Screen Bounce Real)
+        self.SSRO:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE / 1.5) # Screen-Space Reflection (Lighty Photon Go Bouncy Bounce
+#                                                                                                                      Real Bounce Screen Bounce Real)
         
         self.drt_texture:mgl.Texture = self.mesh.texture.get_depth_texture(self.app.WIN_SIZE  * 2) # Depth
         self.crt_texture:mgl.Texture = self.mesh.texture.get_render_texture(self.app.WIN_SIZE * 2) # Colour

@@ -15,10 +15,10 @@ in vec2 uv_0;
 
 layout (location = 0) out vec3 uvPos;
 
-const float stepX = 1;
+const float stepX = 3;
 const float minRayStep = 0.1;
-const float maxSteps = 25;
-const int numBinarySearchSteps = 10;
+const float maxSteps = 7;
+const int numBinarySearchSteps = 5;
 const float reflectionSpecularFalloffExponent = 3.0;
 
 const float far = 1000;
@@ -47,7 +47,7 @@ void main()
     vec3 reflected = normalize(reflect(normalize(viewPos), viewNormal));
 	vec3 UV  = vec3(0);
 
-	if (norm != vec3(0)) {
+	if (norm != vec3(0) && reflected.z < 0.75) {
         vec3 hitPos = viewPos;
 		float dDepth;
 	

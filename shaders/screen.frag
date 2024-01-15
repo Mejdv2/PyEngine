@@ -31,7 +31,7 @@ uniform mat4 view;
 
 
 const float PI = 3.14159265359;
-const float gamma = 2.2;
+const vec3 gamma = vec3(2.2);
 
 
 
@@ -148,6 +148,8 @@ vec3 reflection_Calc(vec3 albedo, vec3 arm, vec3 Normal, vec3 fragPos, vec3 cami
 
 
 void main() {
+    // Allocating and Fetching Data
+
     vec3 color   = texture2D(u_color,   uv_0).rgb;
     vec3 norm    = texture2D(u_norm,    uv_0).rgb;
     vec3 pos     = texture2D(u_pos,     uv_0).rgb;
@@ -155,38 +157,52 @@ void main() {
     vec3 ssr_uv  = texture2D(u_SSR,     uv_0).rgb;
 
     vec3 ssr_color;
+    vec3 ssr_cube_color;
     vec3 ssr_norm;
     vec3 ssr_pos;
     vec3 ssr_shadow;
 
-    vec3 arm    = vec3(1, 0.05, color.b);
+    vec3 arm    = vec3(1, 0.05, 0.01);
     vec3 ss_arm;
     
     if (ssr_uv.z > 0.9) {
-        ssr_color  = texture2D(u_color,   ssr_uv.xy).rgb;
+        ssr_color  = textureLod(u_color,  ssr_uv.xy, arm.g*8).rgb;
         ssr_norm   = texture2D(u_norm,    ssr_uv.xy).rgb;
         ssr_pos    = texture2D(u_pos,     ssr_uv.xy).rgb;
         ssr_shadow = texture2D(u_shadows, ssr_uv.xy).rgb;
 
-        ss_arm     = vec3(1, 0.05, ssr_color.b);
+        ss_arm     = vec3(1, 0.05, 0.01);
+        
+        vec3 reflectDir = reflect(-normalize(pos - ssr_pos), ssr_norm);
+        ssr_cube_color  = textureLod(skybox, reflectDir, ss_arm.g*64).rgb;
+
     }  else  {
         vec3 reflectDir = reflect(-normalize(camPos - pos), norm);
-        ssr_color  = textureCube(skybox, reflectDir).rgb;
+        ssr_color  = textureLod(skybox, reflectDir, arm.g*64).rgb;
     }
+
+    // Now The Real Shading >:D
 
     if (norm == vec3(0)) {
         fragColor = vec4(color, 1.0); // if the normal vector isn't defined (Like skybox), lighting is skipped
 
     } else {
-        vec3 outColor = pow(color, vec3(gamma));
+        color     = pow(color, vec3(gamma));
+        ssr_color = pow(ssr_color, vec3(gamma));
 
-        outColor  = CalcLight(outColor, vec4(1, 0.05, outColor.b, shadow.r), norm, pos, camPos);
-
+        vec3 outColor = CalcLight(color, vec4(arm, shadow.r), norm, pos, camPos);
+        
         if (ssr_norm != vec3(0)) {
-            outColor += reflection_Calc(outColor, vec3(arm), norm, pos, camPos) * 
+            ssr_cube_color = pow(ssr_cube_color, vec3(gamma));
+
+            outColor += reflection_Calc(color, vec3(arm), norm, pos, camPos) * 
                         CalcLight(ssr_color, vec4(ss_arm, ssr_shadow.r), ssr_norm, ssr_pos, pos);
+
+            outColor += reflection_Calc(color, vec3(arm), norm, pos, camPos) * 
+                        reflection_Calc(ssr_color, vec3(ss_arm), ssr_norm, ssr_pos, pos) * ssr_cube_color;
+
         } else {
-            outColor += reflection_Calc(outColor, vec3(arm), norm, pos, camPos) * ssr_color;
+            outColor += reflection_Calc(color, vec3(arm), norm, pos, camPos) * ssr_color;
         }
 
         outColor  = pow(outColor, vec3(1/gamma));

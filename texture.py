@@ -11,9 +11,8 @@ class Texture:
         self.textures['floor'] = self.get_texture(path='textures/tiles/Tiles107_1K-PNG_ColorR.png')
         self.textures['diff'] = self.get_texture(path='objects/sphere/diff_v1.jpg')
         self.textures['rough'] = self.get_texture(path='textures/tiles/Tiles107_1K-PNG_Roughness.png')
-        self.textures['brdfLUT'] = self.get_texture(path='ibl_brdf_lut.png')
-        self.textures['brdfLUT'].repeat_x = False 
-        self.textures['brdfLUT'].repeat_y = False
+
+        self.textures['brdfLUT'] = self.get_brdf_texture(path='ibl_brdf_lut.png')
         
         self.textures['skybox'] = self.get_texture_cube(dir_path='textures/skybox1/', ext='png')
         self.textures['depth_texture'] = self.get_depth_texture(app.light.RESOLUTION * app.light.ppsm)
@@ -68,6 +67,16 @@ class Texture:
         texture.build_mipmaps()
         # AF
         texture.anisotropy = 32.0
+        return texture
+    
+    
+    def get_brdf_texture(self, path):
+        texture = pg.image.load(path).convert()
+        texture = pg.transform.flip(texture, flip_x=False, flip_y=True)
+        texture = self.ctx.texture(size=texture.get_size(), components=3,
+                                   data=pg.image.tostring(texture, 'RGB'))
+        texture.repeat_x = False 
+        texture.repeat_y = False
         return texture
 
     def destroy(self):
