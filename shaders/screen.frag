@@ -162,7 +162,7 @@ void main() {
     vec3 ssr_pos;
     vec3 ssr_shadow;
 
-    vec3 arm    = vec3(1, 0.05, 0.01);
+    vec3 arm    = vec3(1, 0.05, 1);
     vec3 ss_arm;
     
     if (ssr_uv.z > 0.9) {
@@ -171,7 +171,7 @@ void main() {
         ssr_pos    = texture2D(u_pos,     ssr_uv.xy).rgb;
         ssr_shadow = texture2D(u_shadows, ssr_uv.xy).rgb;
 
-        ss_arm     = vec3(1, 0.05, 0.01);
+        ss_arm     = vec3(1, 0.05, 1);
         
         vec3 reflectDir = reflect(-normalize(pos - ssr_pos), ssr_norm);
         ssr_cube_color  = textureLod(skybox, reflectDir, ss_arm.g*64).rgb;
