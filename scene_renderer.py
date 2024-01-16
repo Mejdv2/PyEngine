@@ -40,6 +40,7 @@ class SceneRenderer:
         for obj in self.scene.objects:
             obj.render()
         self.scene.skybox.render()
+        
 
         
     def process_render(self): 

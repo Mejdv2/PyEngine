@@ -56,7 +56,7 @@ class DirectionalLight:
 
     def get_view_matrix(self):
         self.update_camera_vectors()
-        return glm.lookAt(-self.forward * 10, glm.vec3(0, 0, 0), self.up)
+        return glm.lookAt(-self.forward * 2, glm.vec3(0, 0, 0), self.up)
     
     
     def get_proj_matrix(self):

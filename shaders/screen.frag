@@ -16,6 +16,7 @@ uniform sampler2D u_norm;
 uniform sampler2D u_pos;
 uniform sampler2D u_shadows;
 uniform sampler2D u_SSR;
+uniform sampler2D u_SSD;
 
 uniform sampler2D u_brdfLUT;
 uniform samplerCube skybox;
@@ -122,12 +123,10 @@ vec3 CalcLight(vec3 albedo, vec4 arms, vec3 Normal, vec3 fragPos, vec3 camiPos)
     vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
 
-    
-    // ambient lighting (note that the next IBL tutorial will replace 
-    // this ambient lighting with environment lighting).
-
+    // Shadow calculation
     return vec3(max(Lo * arms.a, vec3(0)));
 }
+
 
 
 vec3 reflection_Calc(vec3 albedo, vec3 arm, vec3 Normal, vec3 fragPos, vec3 camiPos){
@@ -143,6 +142,8 @@ vec3 reflection_Calc(vec3 albedo, vec3 arm, vec3 Normal, vec3 fragPos, vec3 cami
     vec2 brdfL  = texture2D(u_brdfLUT, vec2(cosTheta, arm.g)).rg;
     return vec3((FR * brdfL.x + brdfL.y) * arm.r);
 }
+
+
 
 
 

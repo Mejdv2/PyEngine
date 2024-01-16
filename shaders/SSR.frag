@@ -8,6 +8,7 @@ uniform samplerCube envMap;
 
 uniform mat4 invView;
 uniform mat4 view;
+uniform mat4 lightView;
 uniform mat4 projection;
 uniform mat4 invProjection;
 
@@ -15,10 +16,10 @@ in vec2 uv_0;
 
 layout (location = 0) out vec3 uvPos;
 
-const float stepX = 3;
+const float stepX = 5;
 const float minRayStep = 0.1;
-const float maxSteps = 7;
-const int numBinarySearchSteps = 5;
+const float maxSteps = 5;
+const int numBinarySearchSteps = 6;
 const float reflectionSpecularFalloffExponent = 3.0;
 
 const float far = 1000;
@@ -41,13 +42,15 @@ void main()
     vec3 norm = normalize(texture2D(gNormal, uv_0).xyz);
 
     vec3 viewNormal = normalize(vec3(vec4(norm, 1) * invView));
+    vec3 lightViewPos = vec3(lightView * vec4(pos, 1));
+
     vec3 viewPos = vec3(view * vec4(pos, 1));
 
     // Reflection vector
     vec3 reflected = normalize(reflect(normalize(viewPos), viewNormal));
 	vec3 UV  = vec3(0);
 
-	if (norm != vec3(0) && reflected.z < 0.75) {
+	if (norm != vec3(0)) {
         vec3 hitPos = viewPos;
 		float dDepth;
 	
