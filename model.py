@@ -143,9 +143,22 @@ class Screen:
         mv = self.app.camera.m_view
         mp = self.app.camera.m_proj
         
-        self.program_SSR['projection'].write(mp)
-        self.program_SSR['view'].write(mv)
-        self.program_SSR['invView'].write(glm.inverse(mv))
+        try:
+            self.program_SSR['projection'].write(mp)
+        except:
+            pass
+
+
+        try:
+            self.program_SSR['view'].write(mv)
+        except:
+            pass
+    
+
+        try:
+            self.program_SSR['invView'].write(glm.inverse(mv))
+        except:
+            pass
         
 
         self.vao_SSR.render()
@@ -167,6 +180,7 @@ class Screen:
         self.skybox.use(location=10)
 
         self.program['camPos'].write(self.app.camera.position)
+        # self.program['view'].write(self.app.camera.m_view)
         self.program['light.direction'].write(self.app.light.forward)
         self.program['light.color'].write(self.app.light.color)
 

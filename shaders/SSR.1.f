@@ -15,12 +15,11 @@ uniform mat4 invProjection;
 in vec2 uv_0;
 
 layout (location = 0) out vec3 uvPos;
-layout (location = 1) out vec3 uvPosDO;
 
-const float stepX = 5;
+const float stepX = 1;
 const float minRayStep = 0.1;
 const float maxSteps = 25;
-const int numBinarySearchSteps = 10;
+const int numBinarySearchSteps = 7;
 const float reflectionSpecularFalloffExponent = 3.0;
 
 const float far = 1000;
@@ -42,7 +41,7 @@ void main()
     vec3 pos = texture2D(gPosition, uv_0).xyz;
     vec3 norm = normalize(texture2D(gNormal, uv_0).xyz);
 
-    vec3 viewNormal = normalize((view * vec4(norm, 0)).xyz);
+    vec3 viewNormal = normalize(mat3(view) * norm);
     vec3 viewPos = vec3(view * vec4(pos, 1));
 
     // Reflection vector
@@ -57,7 +56,7 @@ void main()
 	
 
 		// Get color
-		if (coords.x > 0 && coords.y > 0 && coords.x < 1 && coords.y < 1 && coords.w > 0.5) {
+		if (coords.x > 0.001 && coords.y > 0.001 && coords.x < 0.999 && coords.y < 0.999 && coords.w > 0.9) {
 			UV = vec3(coords.xy, 1); 
         }
         uvPos = UV;
@@ -84,12 +83,8 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
  
     for(int i = 0; i < numBinarySearchSteps; i++)
     {
-
-        projectedCoord = projection * vec4(hitCoord, 1.0);
-        projectedCoord.xy /= projectedCoord.w;
-        projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
-        depth = (view * vec4(texture2D(gPosition, projectedCoord.xy).rgb, 1)).z;
+        depth = texture2D(gPosition, (hitCoord.xy/-hitCoord.z)*0.5+0.5).z;
 
  
         dDepth = hitCoord.z - depth;
@@ -100,14 +95,8 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
         else
             hitCoord -= dir;    
     }
-
-    dDepth = hitCoord.z - depth;
-
-    projectedCoord = projection * vec4(hitCoord, 1.0);
-    projectedCoord.xy /= projectedCoord.w;
-    projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
-
-    return vec3(projectedCoord.xy, depth);
+ 
+    return vec3((hitCoord.xy/-hitCoord.z)*0.5+0.5, depth);
 }
 
 vec4 RayCast(vec3 dir, inout vec3 hitCoord, out float dDepth)
@@ -124,26 +113,22 @@ vec4 RayCast(vec3 dir, inout vec3 hitCoord, out float dDepth)
     for(int i = 0; i < maxSteps; i++)
     {
         hitCoord += dir;
- 
-        projectedCoord = projection * vec4(hitCoord, 1.0);
-        projectedCoord.xy /= projectedCoord.w;
-        projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
- 
-        depth = (view * vec4(texture2D(gPosition, projectedCoord.xy).rgb, 1)).z;
+
+        depth = texture2D(gPosition, (hitCoord.xy/-hitCoord.z)*0.5+0.5).z;
         if(depth > 1000.0)
             continue;
  
         dDepth = hitCoord.z - depth;
 
-        if(dDepth <= stepX && dDepth >= -stepX)
+        if(dDepth < stepX && dDepth > -stepX)
         { 
             vec4 Result;
             Result = vec4(BinarySearch(dir, hitCoord, dDepth), 1.0);
 
-            if (dDepth <= 0.1 && dDepth >= -0.1) {
+            if (dDepth < 0.1 && dDepth > -0.1) {
                 return Result;
             } else {
-                return vec4(projectedCoord.xy, depth, 0.0);
+                return vec4((hitCoord.xy/-hitCoord.z)*0.5+0.5, depth, 0.0);
             }
         }
         
@@ -151,5 +136,5 @@ vec4 RayCast(vec3 dir, inout vec3 hitCoord, out float dDepth)
     }
 
     
-    return vec4(projectedCoord.xy, depth, 0.0);
+    return vec4((hitCoord.xy/-hitCoord.z)*0.5+0.5, depth, 0.0);
 }

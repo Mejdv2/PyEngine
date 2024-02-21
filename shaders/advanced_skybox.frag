@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 #extension GL_NV_shadow_samplers_cube : enable
 
 layout (location = 0) out vec3 fragColor;

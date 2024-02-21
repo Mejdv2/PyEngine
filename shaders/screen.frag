@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 #extension GL_NV_shadow_samplers_cube : enable
 
 in vec2 uv_0;
@@ -68,10 +68,10 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
     float NdotV = max(dot(N, V), 0.0);
     float NdotL = max(dot(N, L), 0.0);
-    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotV, roughness); // Microfacet obstructed
+    float ggx2 = GeometrySchlickGGX(NdotL, roughness); // Microfacet in shadow
 
-    return ggx1 * ggx2;
+    return ggx1 * ggx2; // what good is a reflected microfacet if its in shadow/obstructed
 }
 
 
@@ -155,7 +155,7 @@ void main() {
     vec3 norm    = texture2D(u_norm,    uv_0).rgb;
     vec3 pos     = texture2D(u_pos,     uv_0).rgb;
     vec3 shadow  = texture2D(u_shadows, uv_0).rgb;
-    vec3 ssr_uv  = texture2D(u_SSR,     uv_0).rgb;
+    vec4 ssr_uv  = texture2D(u_SSR,     uv_0);
 
     vec3 ssr_color;
     vec3 ssr_cube_color;

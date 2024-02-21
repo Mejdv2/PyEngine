@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 
 layout (location = 0) out vec3 fragColor;
 layout (location = 1) out vec3 NormalOut;
